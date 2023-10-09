@@ -238,6 +238,7 @@ def cria_operador4(m_rot_b_a: np.ndarray = np.eye(3), v_o_a: np.ndarray = np.zer
     :param det_tol:
     :return:
     """
+    
     pass
 
 
