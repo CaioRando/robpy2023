@@ -349,7 +349,7 @@ def distancia_entre_retas(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2
 
 
 
-def __eixo_reta_12_np(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np.ndarray) -> float:
+def __eixo_reta_12_np(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np.ndarray) -> np.ndarray:
     """
     *** FUNÇÃO INTERNA AO MÓDULO ***
     Calcula um vetor unitário perpendicular às retas 1 e 2 que aponta necessariamente da reta 1 à reta 2. As retas não
@@ -360,7 +360,11 @@ def __eixo_reta_12_np(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np
     :param vs2: Vetor orientação da reta 1
     :return: vetor unitário que aponta da reta 1 à reta 2
     """
-    pass
+    e = produto_vetorial(vs1, vs2)
+    e = e / norma_vetor(e)
+    d = po2 - po1
+    return e * np.sign(produto_escalar(d,e))
+
 
 
 def __eixo_reta_12_p(po1: np.ndarray, po2: np.ndarray, vs: np.ndarray) -> float:
@@ -372,10 +376,13 @@ def __eixo_reta_12_p(po1: np.ndarray, po2: np.ndarray, vs: np.ndarray) -> float:
     :param vs: Vetor direção de ambas as retas
     :return: vetor unitário que aponta da reta 1 à reta 2
     """
-    pass
+    d = po2 - po1
+    dn = d - proj_vetores(d, vs)
+    return dn / norma_vetor(dn)
+    
 
 
-def eixo_reta_12(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np.ndarray, angtol=1e-3) -> float:
+def eixo_reta_12(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np.ndarray, angtol=1e-3) -> np.ndarray:
     """
     Calcula um vetor unitário que aponta da reta 1 à reta 2, independente de sua orientação.
     :param po1: Vetor posição de um ponto de referência na reta 1
@@ -385,7 +392,14 @@ def eixo_reta_12(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np.ndar
     :param angtol: Tolerância de ângulo entre as retas para decidir se são paralelas
     :return: vetor unitário que aponta da reta 1 à reta 2
     """
-    pass
+    if angtol < 0:
+        raise ValueError('A tolerância angular deve ser um valor não negativo')
+
+    ang = np.abs(ang_vetores(vs1, vs2))
+    if ang < angtol or np.abs(ang-np.pi) < angtol:
+        return __eixo_reta_12_p(po1, po2, vs1)
+    else:
+        return __eixo_reta_12_np(po1, vs1, po2, vs2)
 
 
 def ang_twist_dir_nc_rad(po1: np.ndarray, vs1: np.ndarray, po2: np.ndarray, vs2: np.ndarray, angtol=1e-3) -> float:
